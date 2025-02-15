@@ -45,6 +45,15 @@ span.version {
   font-size: smaller;
 }
 
+span.stats {
+  float: right;
+}
+
+canvas {
+  aspect-ratio: 4 / 3;
+  width: 100%
+}
+
 .global-row {
   display: flex;
 }
