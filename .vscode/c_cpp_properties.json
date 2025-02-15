@@ -1,0 +1,38 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/Source",
+                "${workspaceFolder}/deps/Framework/include",
+                "${workspaceFolder}/deps/CodeGen/include",
+                "${workspaceFolder}/tools/PsfPlayer/Source",
+                "C:/Program Files (x86)/OpenAL 1.1 SDK/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "WIN32"
+            ],
+            "windowsSdkVersion": "10.0.22000.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/Source",
+                    "${workspaceFolder}/deps/Framework/include",
+                    "${workspaceFolder}/deps/CodeGen/include",
+                    "${workspaceFolder}/tools/PsfPlayer/Source",
+                    "C:/Program Files (x86)/OpenAL 1.1 SDK/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}

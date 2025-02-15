@@ -16,3 +16,6 @@
 [submodule "deps/AltKit"]
 	path = deps/AltKit
 	url = https://github.com/jpd002/AltKit.git
+[submodule "deps/rcheevos"]
+	path = deps/rcheevos
+	url = https://github.com/RetroAchievements/rcheevos.git

@@ -1,0 +1,19 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureArgs": [
+        "-G",
+        "Visual Studio 17 2022",
+        "-A",
+        "x64",
+        "-DUSE_QT=NO",
+        "-DBUILD_TESTS=ON",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_PSFPLAYER=OFF"
+    ],
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "*.h": "cpp",
+        "*.cpp": "cpp"
+    }
+}
