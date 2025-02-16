@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include <QtWidgets/QListWidget>
-
+#include "AchievementSettingsWidget.h"
 #include "AppConfig.h"
 
 namespace Ui
@@ -55,4 +55,5 @@ private slots:
 
 private:
 	Ui::SettingsDialog* ui;
+	CAchievementSettingsWidget* m_achievementWidget;
 };

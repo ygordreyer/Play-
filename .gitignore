@@ -29,6 +29,7 @@ CMakeLists.txt.user*
 
 # IDE specific
 .vs/
+.qtc/
 .vscode/
 *.swp
 *.swo

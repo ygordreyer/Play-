@@ -62,6 +62,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 	ui->comboBox_vulkan_device->blockSignals(false);
 	ui->comboBox_gs_selection->blockSignals(false);
 
+	// Set up achievements widget
+	m_achievementWidget = new CAchievementSettingsWidget(this);
+	ui->verticalLayout3->addWidget(m_achievementWidget);
+
 	LoadPreferences();
 	connect(ui->listWidget, &QListWidget::currentItemChanged, this, &SettingsDialog::changePage);
 }

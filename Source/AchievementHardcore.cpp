@@ -1,10 +1,8 @@
 #include "AchievementHardcore.h"
-#include "AchievementMemory.h"
-#include "Log.h"
+#include "AchievementMemoryMonitor.h"
+#include <algorithm>
 
-#define LOG_NAME "AchievementHardcore"
-
-CAchievementHardcore::CAchievementHardcore(CAchievementMemory& memory)
+CAchievementHardcore::CAchievementHardcore(CAchievementMemoryMonitor& memory)
     : m_memory(memory)
     , m_enabled(false)
 {
@@ -16,98 +14,34 @@ void CAchievementHardcore::Enable(bool enable)
         return;
 
     m_enabled = enable;
-    m_memory.EnableMemoryProtection(enable);
 
-    CLog::GetInstance().Print(LOG_NAME, "Hardcore mode %s\r\n", 
-        enable ? "enabled" : "disabled");
-
-    NotifyModeChange(enable);
-}
-
-void CAchievementHardcore::AddModeChangeCallback(const HardcoreModeCallback& callback)
-{
-    m_modeCallbacks.push_back(callback);
-}
-
-bool CAchievementHardcore::ValidateSaveStateOperation(const char* operation)
-{
-    if (!m_enabled)
-        return true;
-
-    CLog::GetInstance().Print(LOG_NAME, "Save state %s blocked in hardcore mode\r\n", 
-        operation);
-    return false;
-}
-
-bool CAchievementHardcore::CheckSaveStateAllowed(Framework::CZipArchiveReader& reader)
-{
-    if (!m_enabled)
-        return true;
-
-    try
+    // When enabling hardcore mode, validate current state
+    if (m_enabled)
     {
-        auto stream = reader.BeginReadFile("header");
-        SAVESTATE_HEADER header;
-        stream->Read(&header, sizeof(header));
-
-        return ValidateSaveStateHeader(header);
-    }
-    catch(...)
-    {
-        CLog::GetInstance().Print(LOG_NAME, "Failed to read save state header\r\n");
-        return false;
+        ValidateSystemState();
     }
 }
 
-bool CAchievementHardcore::CheckLoadStateAllowed(Framework::CZipArchiveReader& reader)
+bool CAchievementHardcore::IsEnabled() const
 {
-    if (!m_enabled)
-        return true;
-
-    try
-    {
-        auto stream = reader.BeginReadFile("header");
-        SAVESTATE_HEADER header;
-        stream->Read(&header, sizeof(header));
-
-        if (!ValidateSaveStateHeader(header))
-            return false;
-
-        return IsSaveStateCompatible(header);
-    }
-    catch(...)
-    {
-        CLog::GetInstance().Print(LOG_NAME, "Failed to read save state header\r\n");
-        return false;
-    }
+    return m_enabled;
 }
 
 void CAchievementHardcore::AddProtectedRegion(uint32 start, uint32 size)
 {
+    // Remove any overlapping regions
+    m_protectedRegions.erase(
+        std::remove_if(m_protectedRegions.begin(), m_protectedRegions.end(),
+            [start, size](const PROTECTED_REGION& region) {
+                return (start < (region.start + region.size)) && ((start + size) > region.start);
+            }),
+        m_protectedRegions.end());
+
+    // Add new region
     PROTECTED_REGION region;
     region.start = start;
     region.size = size;
     m_protectedRegions.push_back(region);
-
-    if (m_enabled)
-    {
-        m_memory.SetProtectedRegion(start, size);
-    }
-
-    CLog::GetInstance().Print(LOG_NAME, "Added protected region: 0x%08X - 0x%08X\r\n",
-        start, start + size);
-}
-
-void CAchievementHardcore::ClearProtectedRegions()
-{
-    m_protectedRegions.clear();
-    
-    if (m_enabled)
-    {
-        m_memory.ClearProtectedRegions();
-    }
-
-    CLog::GetInstance().Print(LOG_NAME, "Cleared all protected regions\r\n");
 }
 
 bool CAchievementHardcore::IsAddressProtected(uint32 address) const
@@ -115,24 +49,19 @@ bool CAchievementHardcore::IsAddressProtected(uint32 address) const
     if (!m_enabled)
         return false;
 
-    for (const auto& region : m_protectedRegions)
-    {
-        if (address >= region.start && address < (region.start + region.size))
-            return true;
-    }
-    return false;
+    return std::any_of(m_protectedRegions.begin(), m_protectedRegions.end(),
+        [address](const PROTECTED_REGION& region) {
+            return (address >= region.start) && (address < (region.start + region.size));
+        });
 }
 
 bool CAchievementHardcore::ValidateMemoryState()
 {
+    // In hardcore mode, protected memory regions must not be modified
     if (!m_enabled)
         return true;
 
-    for (const auto& region : m_protectedRegions)
-    {
-        if (!ValidateRegion(region))
-            return false;
-    }
+    // TODO: Validate memory contents against known good values
     return true;
 }
 
@@ -145,37 +74,18 @@ bool CAchievementHardcore::ValidateSystemState()
     if (!ValidateMemoryState())
         return false;
 
-    // Additional system state validation can be added here
+    // TODO: Validate other system state (registers, etc.)
     return true;
 }
 
-bool CAchievementHardcore::ValidateRegion(const PROTECTED_REGION& region)
+bool CAchievementHardcore::ValidateSaveStateOperation(const char* operation)
 {
-    return m_memory.ValidateRange(region.start, region.start + region.size);
-}
-
-void CAchievementHardcore::NotifyModeChange(bool enabled)
-{
-    for (const auto& callback : m_modeCallbacks)
+    // In hardcore mode, save states are not allowed
+    if (m_enabled)
     {
-        callback(enabled);
-    }
-}
-
-bool CAchievementHardcore::ValidateSaveStateHeader(const SAVESTATE_HEADER& header)
-{
-    if (header.magic != SAVESTATE_MAGIC)
-    {
-        CLog::GetInstance().Print(LOG_NAME, "Invalid save state magic\r\n");
+        // TODO: Log attempt to use save states in hardcore mode
         return false;
     }
 
-    return true;
-}
-
-bool CAchievementHardcore::IsSaveStateCompatible(const SAVESTATE_HEADER& header)
-{
-    // Check version compatibility
-    // Add more compatibility checks as needed
     return true;
 }

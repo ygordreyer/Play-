@@ -90,10 +90,14 @@ endif()
 list(APPEND PROJECT_LIBS ui_shared)
 
 set(QT_SOURCES
-	BootableModel.cpp
-	BootableModel.h
-	BootableModelProxy.cpp
-	BootableModelProxy.h
+    BootableModel.cpp
+    BootableModel.h
+    BootableModelProxy.cpp
+    BootableModelProxy.h
+    AchievementLoginDialog.cpp
+    AchievementLoginDialog.h
+    AchievementSettingsWidget.cpp
+    AchievementSettingsWidget.h
 	ControllerConfig/controllerconfigdialog.cpp
 	ControllerConfig/controllerconfigdialog.h
 	ControllerConfig/inputbindingmodel.cpp
@@ -208,9 +212,11 @@ if(DEBUGGER_INCLUDED)
 endif()
 	
 set(QT_MOC_HEADERS
-	BootableModel.h
-	BootableModelProxy.h
-	ControllerConfig/controllerconfigdialog.h
+    BootableModel.h
+    BootableModelProxy.h
+    ControllerConfig/controllerconfigdialog.h
+    AchievementLoginDialog.h
+    AchievementSettingsWidget.h
 	ControllerConfig/inputbindingmodel.h
 	ControllerConfig/inputeventselectiondialog.h
 	mainwindow.h
