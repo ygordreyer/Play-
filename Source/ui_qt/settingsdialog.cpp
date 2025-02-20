@@ -63,7 +63,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 	ui->comboBox_gs_selection->blockSignals(false);
 
 	// Set up achievements widget
-	m_achievementWidget = new CAchievementSettingsWidget(this);
+	m_achievementWidget = new AchievementSettingsWidget(this);
 	ui->verticalLayout3->addWidget(m_achievementWidget);
 
 	LoadPreferences();

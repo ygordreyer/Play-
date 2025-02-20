@@ -8,6 +8,9 @@ include(Header)
 
 project(PlayCore)
 
+# Achievement System Option
+option(BUILD_ACHIEVEMENTS "Build with RetroAchievements support" ON)
+
 set(PROJECT_LIBS)
 
 include(PrecompiledHeader)
@@ -556,6 +559,7 @@ if(TARGET_PLATFORM_JS)
 endif()
 
 add_library(PlayCore STATIC ${COMMON_SRC_FILES} ${PLATFORM_SPECIFIC_SRC_FILES})
+
 target_link_libraries(PlayCore ${PROJECT_LIBS})
 target_include_directories(PlayCore
 	PUBLIC

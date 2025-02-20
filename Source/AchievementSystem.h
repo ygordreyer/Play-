@@ -6,9 +6,16 @@
 #include <string>
 #include <vector>
 
+class CMemoryMap;
+
 class CAchievementSystem
 {
 public:
+    // Singleton management
+    static CAchievementSystem* GetInstance();
+    static void CreateInstance(CMemoryMap* memoryMap);
+    static void DestroyInstance();
+
     // Achievement system events
     using AchievementUnlockedHandler = std::function<void(const std::string& achievementId, const std::string& title)>;
     using ProgressUpdatedHandler = std::function<void(const std::string& achievementId, float progress)>;

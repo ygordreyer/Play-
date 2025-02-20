@@ -1,63 +1,83 @@
-#ifndef ACHIEVEMENTSETTINGSWIDGET_H
-#define ACHIEVEMENTSETTINGSWIDGET_H
+#pragma once
+
+#include "uint128.h"
 
 #include <QWidget>
-#include <QCheckBox>
-#include <QSlider>
-#include <QPushButton>
-#include <QLabel>
+#include <memory>
 
-namespace Ui
-{
-    class AchievementSettingsWidget;
-}
+class QCheckBox;
+class QSlider;
+class QPushButton;
+class QLabel;
+class QGroupBox;
+class CAchievementsConfig;
+class CAchievementSystem;
 
-class CAchievementSettingsWidget : public QWidget
-{
+class AchievementSettingsWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CAchievementSettingsWidget(QWidget* parent = nullptr);
-    ~CAchievementSettingsWidget();
-
-    void LoadSettings();
-    void SaveSettings();
+    explicit AchievementSettingsWidget(QWidget* parent = nullptr);
+    ~AchievementSettingsWidget();
 
 private slots:
-    void OnLoginClicked();
-    void OnViewProfileClicked();
-    void OnHardcoreModeChanged(bool checked);
-    void OnSettingChanged();
+    void onLoginStateChanged();
+    void onSettingChanged();
+    void onHardcoreModeToggled(bool enabled);
+    void onLoginButtonClicked();
+    void onViewProfileClicked();
+    void onNotificationDurationChanged(int value);
+    void onLeaderboardDurationChanged(int value);
+    void onAchievementUnlocked(const std::string& id, const std::string& title);
+    void onGameInfoUpdated(uint32 gameId, const QString& gameInfo);
 
 private:
-    void CreateLayout();
-    void ConnectSignals();
-    void UpdateLoginState();
-    void UpdateProfileDisplay();
+    void setupUI();
+    void connectSignals();
+    void loadSettings();
+    void saveSettings();
+    void updateUIState();
+    void createTooltips();
 
-    // Core settings
-    QCheckBox* m_enableAchievements;
-    QCheckBox* m_hardcoreMode;
-    QCheckBox* m_encoreMode;
-    QCheckBox* m_spectatorMode;
-    QCheckBox* m_unofficialMode;
+    // UI Groups
+    QGroupBox* createCoreSettingsGroup();
+    QGroupBox* createNotificationSettingsGroup();
+    QGroupBox* createProfileGroup();
+    QGroupBox* createGameInfoGroup();
 
-    // Notification settings
-    QCheckBox* m_enableNotifications;
-    QCheckBox* m_enableLeaderboardNotifications;
-    QCheckBox* m_enableSoundEffects;
-    QCheckBox* m_enableOverlays;
-    QSlider* m_notificationDuration;
-    QSlider* m_leaderboardDuration;
+    struct {
+        // Core Settings
+        QCheckBox* enableAchievements;
+        QCheckBox* hardcoreMode;
+        QCheckBox* encoreMode;
+        QCheckBox* spectatorMode;
+        QCheckBox* unofficialMode;
 
-    // Profile
-    QPushButton* m_loginButton;
-    QPushButton* m_viewProfile;
-    QLabel* m_usernameLabel;
-    QLabel* m_pointsLabel;
-    QLabel* m_unreadLabel;
+        // Notification Settings
+        QCheckBox* showNotifications;
+        QCheckBox* showLeaderboardNotifications;
+        QCheckBox* enableSoundEffects;
+        QCheckBox* showOverlays;
+        QSlider* notificationDuration;
+        QSlider* leaderboardDuration;
+        QLabel* notificationDurationLabel;
+        QLabel* leaderboardDurationLabel;
 
-    bool m_isLoggedIn;
+        // Profile
+        QPushButton* loginButton;
+        QPushButton* viewProfileButton;
+        QLabel* usernameLabel;
+        QLabel* pointsLabel;
+        QLabel* lastLoginLabel;
+
+        // Game Info
+        QLabel* gameTitle;
+        QLabel* achievementCount;
+        QLabel* completionStatus;
+        QLabel* pointsEarned;
+    } ui;
+
+    std::unique_ptr<CAchievementsConfig> m_config;
+    CAchievementSystem* m_achievementSystem;
+    bool m_blockSettingsUpdate;
 };
-
-#endif // ACHIEVEMENTSETTINGSWIDGET_H

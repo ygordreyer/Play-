@@ -55,5 +55,5 @@ private slots:
 
 private:
 	Ui::SettingsDialog* ui;
-	CAchievementSettingsWidget* m_achievementWidget;
+	AchievementSettingsWidget* m_achievementWidget;
 };

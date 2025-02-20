@@ -45,6 +45,8 @@
 #include "ui_debugdockmenu.h"
 #include "ui_debugmenu.h"
 #endif
+#include "AchievementSystem.h"
+#include "AchievementsConfig.h"
 #include "input/PH_GenericInput.h"
 #include "ui_shared/BootableUtils.h"
 #include "PathUtils.h"
@@ -166,6 +168,24 @@ void MainWindow::InitVirtualMachine()
 	m_virtualMachine->Initialize();
 
 	SetupSoundHandler();
+
+	// Initialize achievement system after VM is fully set up
+	auto achievementConfig = CAchievementsConfig::LoadConfig();
+	if(achievementConfig && m_virtualMachine->GetMemoryMap())
+	{
+		try
+		{
+			CAchievementSystem::CreateInstance(*m_virtualMachine->GetMemoryMap());
+			if(auto* achievementSystem = CAchievementSystem::GetInstance())
+			{
+				achievementSystem->Initialize();
+			}
+		}
+		catch(const std::exception& e)
+		{
+			printf("Failed to initialize achievement system: %s\n", e.what());
+		}
+	}
 
 	{
 		m_virtualMachine->CreatePadHandler(CPH_GenericInput::GetFactoryFunction());
@@ -668,6 +688,16 @@ void MainWindow::SetupSaveLoadStateSlots()
 
 void MainWindow::saveState(int stateSlot)
 {
+	if(auto achievementSystem = CAchievementSystem::GetInstance())
+	{
+		if(!achievementSystem->IsSaveStateAllowed())
+		{
+			m_msgLabel->setText(QString("Save states are not allowed in hardcore mode."));
+			return;
+		}
+		achievementSystem->OnSaveStateCreated();
+	}
+
 	auto stateFilePath = m_virtualMachine->GenerateStatePath(stateSlot);
 	auto future = m_virtualMachine->SaveState(stateFilePath);
 	m_continuationChecker->GetContinuationManager().Register(std::move(future),
@@ -688,6 +718,16 @@ void MainWindow::saveState(int stateSlot)
 
 void MainWindow::loadState(int stateSlot)
 {
+	if(auto achievementSystem = CAchievementSystem::GetInstance())
+	{
+		if(!achievementSystem->IsSaveStateAllowed())
+		{
+			m_msgLabel->setText(QString("Save states are not allowed in hardcore mode."));
+			return;
+		}
+		achievementSystem->OnSaveStateLoaded();
+	}
+
 	auto stateFilePath = m_virtualMachine->GenerateStatePath(stateSlot);
 	auto future = m_virtualMachine->LoadState(stateFilePath);
 	m_continuationChecker->GetContinuationManager().Register(std::move(future),

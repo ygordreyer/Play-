@@ -9,6 +9,12 @@
 
 const char AchievementHTTPDownloader::DEFAULT_USER_AGENT[] = "Play-Achievement-Client/1.0";
 
+AchievementHTTPDownloader::AchievementHTTPDownloader()
+    : m_timeout(30.0f)
+    , m_max_active_requests(4)
+{
+}
+
 AchievementHTTPDownloader::~AchievementHTTPDownloader() = default;
 
 std::unique_ptr<AchievementHTTPDownloader> AchievementHTTPDownloader::Create(std::string user_agent)

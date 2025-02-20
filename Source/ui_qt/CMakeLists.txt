@@ -360,6 +360,11 @@ else()
 	add_executable(Play ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
 endif()
 
+if(BUILD_ACHIEVEMENTS)
+    # Add rcheevos to project libs
+    list(APPEND PROJECT_LIBS rcheevos)
+endif()
+
 target_link_libraries(Play ${PROJECT_LIBS})
 target_compile_definitions(Play PRIVATE ${DEFINITIONS_LIST})
 

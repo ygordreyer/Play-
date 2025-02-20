@@ -1,7 +1,7 @@
 #pragma once
 
-#include "deps/Framework/include/Types.h"
-#include "deps/Framework/include/Config.h"
+#include "../deps/Framework/include/Types.h"
+#include "../deps/Framework/include/Config.h"
 #include <string>
 
 // Preference names

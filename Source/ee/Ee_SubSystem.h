@@ -68,6 +68,11 @@ namespace Ee
 		CPS2OS* m_os = nullptr;
 		CIopBios& m_iopBios;
 
+		CMemoryMap** GetMemoryMap()
+		{
+			return &m_EE.m_pMemoryMap;
+		}
+
 		void* operator new(size_t allocSize)
 		{
 			return framework_aligned_alloc(allocSize, 0x10);

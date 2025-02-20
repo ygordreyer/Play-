@@ -105,6 +105,11 @@ public:
 	ExecutableReloadedHandler BeforeExecutableReloaded;
 	ExecutableReloadedHandler AfterExecutableReloaded;
 
+	CMemoryMap** GetMemoryMap()
+	{
+		return m_ee->GetMemoryMap();
+	}
+
 protected:
 	virtual void CreateVM();
 	void ResumeImpl();

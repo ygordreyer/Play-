@@ -2,17 +2,21 @@ if(BUILD_ACHIEVEMENTS)
     # Achievement System Files
     set(ACHIEVEMENT_SRCS
         Source/AchievementSystem.h
+        Source/AchievementSystem.cpp
         Source/AchievementSystemImpl.h
         Source/AchievementMemoryMonitor.h
         Source/AchievementMemoryMonitor.cpp
         Source/AchievementStateManager.h
         Source/AchievementRcheevosAdapter.h
+        Source/AchievementRcheevosAdapter.cpp
         Source/AchievementHTTPDownloader.h
         Source/AchievementHTTPDownloader.cpp
         #Source/AchievementHTTPDownloaderCurl.h
         #Source/AchievementHTTPDownloaderCurl.cpp
         Source/AchievementHardcore.h
         Source/AchievementHardcore.cpp
+        Source/AchievementsConfig.h
+        Source/AchievementsConfig.cpp
     )
 
     # Platform-specific HTTP implementation
@@ -23,6 +27,8 @@ if(BUILD_ACHIEVEMENTS)
         )
         # WinHTTP is always available on Windows
         target_compile_definitions(PlayCore PRIVATE HAVE_WINHTTP=1)
+        # Link against WinHTTP library
+        target_link_libraries(PlayCore winhttp)
     endif()
 
     # Try to find system CURL
@@ -35,12 +41,12 @@ if(BUILD_ACHIEVEMENTS)
         target_compile_definitions(PlayCore PRIVATE HAVE_LIBCURL=1)
     elseif(TARGET_PLATFORM_ANDROID)
         # For Android, we'll bundle CURL
-        set(CURL_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/curl")
+        set(CURL_INSTALL_DIR "${CMAKE_SOURCE_DIR}/deps/curl")
         if(NOT EXISTS "${CURL_INSTALL_DIR}/include/curl/curl.h")
             message(STATUS "Downloading and building CURL for Android...")
             execute_process(
                 COMMAND git clone --depth 1 --branch curl-8_5_0 https://github.com/curl/curl.git "${CURL_INSTALL_DIR}"
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/deps
             )
             # Build CURL for Android here
             # TODO: Add Android-specific CURL build configuration
@@ -54,36 +60,40 @@ if(BUILD_ACHIEVEMENTS)
     endif()
 
     # Check rcheevos dependency
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/rcheevos/include/rcheevos.h")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/deps/rcheevos/include/rcheevos.h")
         message(FATAL_ERROR "rcheevos dependency not found. Please run: git submodule update --init --recursive")
     endif()
 
     # Build rcheevos library
     set(RCHEEVOS_SRCS
-        deps/rcheevos/src/rcheevos/alloc.c
-        deps/rcheevos/src/rcheevos/condition.c
-        deps/rcheevos/src/rcheevos/condset.c
-        deps/rcheevos/src/rcheevos/consoleinfo.c
-        deps/rcheevos/src/rcheevos/format.c
-        deps/rcheevos/src/rcheevos/lboard.c
-        deps/rcheevos/src/rcheevos/memref.c
-        deps/rcheevos/src/rcheevos/operand.c
-        deps/rcheevos/src/rcheevos/richpresence.c
-        deps/rcheevos/src/rcheevos/runtime.c
-        deps/rcheevos/src/rcheevos/runtime_progress.c
-        deps/rcheevos/src/rcheevos/trigger.c
-        deps/rcheevos/src/rcheevos/value.c
-        deps/rcheevos/src/rapi/rc_api_common.c
-        deps/rcheevos/src/rapi/rc_api_editor.c
-        deps/rcheevos/src/rapi/rc_api_info.c
-        deps/rcheevos/src/rapi/rc_api_runtime.c
-        deps/rcheevos/src/rapi/rc_api_user.c
-        deps/rcheevos/src/rhash/md5.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/alloc.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/condition.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/condset.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/consoleinfo.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/format.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/lboard.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/memref.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/operand.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/richpresence.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/runtime.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/runtime_progress.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/trigger.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rcheevos/value.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rapi/rc_api_common.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rapi/rc_api_editor.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rapi/rc_api_info.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rapi/rc_api_runtime.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rapi/rc_api_user.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rhash/md5.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rc_client.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rc_util.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rc_compat.c
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src/rc_version.c
     )
 
     add_library(rcheevos STATIC ${RCHEEVOS_SRCS})
     target_include_directories(rcheevos PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/rcheevos/include
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/include
     )
     target_compile_definitions(rcheevos PRIVATE
         RC_DISABLE_LUA=1
@@ -94,14 +104,22 @@ if(BUILD_ACHIEVEMENTS)
     
     # Add achievement system include directories
     target_include_directories(PlayCore PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/rcheevos/include
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/include
+        ${CMAKE_SOURCE_DIR}/deps/rcheevos/src
+        ${CMAKE_SOURCE_DIR}/deps/Framework/include
+        ${CMAKE_SOURCE_DIR}/deps/Framework/src
+        ${CMAKE_SOURCE_DIR}/deps/Framework
     )
 
     # Add achievement system compile definitions
     target_compile_definitions(PlayCore PRIVATE
         ENABLE_ACHIEVEMENTS=1
+        BUILD_ACHIEVEMENTS=1
     )
 
-    # Link against rcheevos
+    # Set position independent code for rcheevos
+    set_property(TARGET rcheevos PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+    # Link against rcheevos using consistent plain syntax
     target_link_libraries(PlayCore rcheevos)
 endif()
